@@ -1,13 +1,15 @@
-#[derive (PartialEq)]
-enum TokenType {
+#[derive (Debug, PartialEq)]
+pub enum TokenType {
+    IntLiteral (u64),
     WhiteSpace,
     EOF,
 }
 
+#[derive(Debug)]
 pub struct Token {
-    tok_type: TokenType,
-    line: u32,
-    col: u32,
+    pub tok_type: TokenType,
+    pub line: u32,
+    pub col: u32,
 }
 
 impl PartialEq for Token {

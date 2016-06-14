@@ -1,4 +1,4 @@
-use lexer::token::Token;
+use lexer::token::{ Token, TokenType };
 use lexer::matcher::Matcher;
 
 struct Snapshot {
@@ -7,17 +7,16 @@ struct Snapshot {
     column: u32,
 }
 
-pub struct Tokenizer<T> where T: Iterator, <T as Iterator>::Item : Clone {
+pub struct Tokenizer {
     index : usize,
-    line: u32,
-    column: u32,
-    items : Vec<<T as Iterator>::Item>,
+    pub line: u32,
+    pub column: u32,
+    items : Vec<char>,
     snapshots : Vec<Snapshot>,
-    matchers : Vec<Box<Matcher<T>>>,
 }
 
-impl<T> Iterator for Tokenizer<T> where T: Iterator, <T as Iterator>::Item : Clone {
-    type Item = <T as Iterator>::Item;
+impl Iterator for Tokenizer {
+    type Item = char;
 
     fn next (&mut self) -> Option <Self::Item> {
         if self.end () {
@@ -30,15 +29,14 @@ impl<T> Iterator for Tokenizer<T> where T: Iterator, <T as Iterator>::Item : Clo
     }
 }
 
-impl<T> Tokenizer<T> where T: Iterator, <T as Iterator>::Item : Clone {
-    pub fn new (items: T) -> Tokenizer<T>  {
+impl Tokenizer {
+    pub fn new (items: &mut Iterator<Item = char>) -> Tokenizer  {
         Tokenizer {
             index : 0,
             line : 0,
             column : 0,
             items : items.collect (),
             snapshots : Vec::new (),
-            matchers : Vec::new (),
         }
     }
 
@@ -49,18 +47,18 @@ impl<T> Tokenizer<T> where T: Iterator, <T as Iterator>::Item : Clone {
         false
     }
 
-    pub fn peek (&mut self) -> Option<&<T as Iterator>::Item> {
+    pub fn peek (&mut self) -> Option<char> {
         if self.end () {
             return None
         }
-        Some (&self.items[self.index])
+        Some (self.items[self.index].clone ())
     }
 
-    pub fn read (&mut self) -> Option<&<T as Iterator>::Item> {
+    pub fn read (&mut self) -> Option<char> {
         if self.end () {
             return None
         }
-        let val = Some (&self.items[self.index]);
+        let val = Some (self.items[self.index].clone ());
         self.index += 1;
         self.column += 1;
         val
@@ -79,5 +77,23 @@ impl<T> Tokenizer<T> where T: Iterator, <T as Iterator>::Item : Clone {
 
     pub fn commit_snapshot (&mut self) {
         self.snapshots.pop ();
+    }
+
+    pub fn try_match_token (&mut self, matcher: &Matcher) -> Option<Token>  {
+        if self.end () {
+            return Some (Token { tok_type: TokenType::EOF, line: self.line, col: self.column })
+        }
+
+        self.take_snapshot();
+        match matcher.try_match (self) {
+            Some (tok) => {
+                self.commit_snapshot ();
+                Some (tok)
+            }
+            None => {
+                self.rollback_snapshot();
+                None
+            }
+        }
     }
 }
