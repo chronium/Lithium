@@ -21,7 +21,7 @@ impl Iterator for Lexer {
                 tok = self.next ().unwrap ();
             }
             _ => {
-                
+
             }
         }
 

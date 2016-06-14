@@ -49,3 +49,32 @@ impl Matcher for MatchNumber {
         None
     }
 }
+
+pub struct MatchSymbol {
+    symbols: Vec<String>
+}
+
+impl MatchSymbol {
+    pub fn new (symbols: Vec<String>) -> MatchSymbol {
+        MatchSymbol {
+            symbols: symbols
+        }
+    }
+}
+
+impl Matcher for MatchSymbol {
+    fn try_match (&self, tok: &mut Tokenizer) -> Option<Token> {
+        for symbol in self.symbols.clone () {
+            let dat = tok.clone ().take (symbol.len ());
+            if dat.size_hint ().1.unwrap () != symbol.len () {
+                return None
+            }
+
+            if dat.collect::<String> () == symbol {
+                tok.advance (symbol.len ());
+                return Some (Token { tok_type : TokenType::Symbol(symbol), line: tok.line, col: tok.column })
+            }
+        }
+        None
+    }
+}

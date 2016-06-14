@@ -1,12 +1,14 @@
 use lexer::token::{ Token, TokenType };
 use lexer::matcher::Matcher;
 
+#[derive(Clone)]
 struct Snapshot {
     index: usize,
     line: u32,
     column: u32,
 }
 
+#[derive(Clone)]
 pub struct Tokenizer {
     index : usize,
     pub line: u32,
@@ -19,13 +21,7 @@ impl Iterator for Tokenizer {
     type Item = char;
 
     fn next (&mut self) -> Option <Self::Item> {
-        if self.end () {
-            return None
-        }
-        let val = Some (self.items[self.index].clone ());
-        self.index += 1;
-        self.column += 1;
-        val
+        self.read ()
     }
 }
 
@@ -62,6 +58,11 @@ impl Tokenizer {
         self.index += 1;
         self.column += 1;
         val
+    }
+
+    pub fn advance (&mut self, amm: usize) {
+        self.index += amm;
+        self.column += amm as u32;
     }
 
     pub fn take_snapshot (&mut self) {

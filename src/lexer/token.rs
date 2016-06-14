@@ -1,6 +1,7 @@
 #[derive (Debug, PartialEq)]
 pub enum TokenType {
     IntLiteral (u64),
+    Symbol (String),
     WhiteSpace,
     EOF,
 }
