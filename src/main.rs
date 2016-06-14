@@ -4,7 +4,7 @@ use lexer::matcher::{ MatchWhitespace, MatchNumber };
 
 fn main () {
     let mut data = "128 256".chars ();
-    let mut tok = lexer::Tokenizer::new (&mut data);
+    let tok = lexer::Tokenizer::new (&mut data);
     let mut lexer = lexer::Lexer::new (tok);
     let whitespace = MatchWhitespace { };
     let num = MatchNumber { };

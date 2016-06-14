@@ -12,11 +12,19 @@ impl Iterator for Lexer {
 
     fn next (&mut self) -> Option<Token> {
         let mut tok = self.match_token ().unwrap ();
-        if tok.tok_type == TokenType::EOF {
-            return None
-        } else if tok.tok_type == TokenType::WhiteSpace {
-            tok = self.next ().unwrap ();
+
+        match tok.tok_type {
+            TokenType::EOF => {
+                return None
+            }
+            TokenType::WhiteSpace => {
+                tok = self.next ().unwrap ();
+            }
+            _ => {
+                
+            }
         }
+
         Some (tok)
     }
 }
