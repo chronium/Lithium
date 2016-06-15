@@ -1,7 +1,7 @@
 #[derive (Debug, PartialEq)]
 pub enum TokenType {
-    IntLiteral (u64),
-    Symbol (String),
+    IntLiteral(u64),
+    Symbol(String),
     WhiteSpace,
     EOF,
 }
@@ -14,11 +14,11 @@ pub struct Token {
 }
 
 impl PartialEq for Token {
-    fn eq (&self, other: &Token) -> bool {
+    fn eq(&self, other: &Token) -> bool {
         self.tok_type == other.tok_type
     }
 
-    fn ne (&self, other: &Token) -> bool {
+    fn ne(&self, other: &Token) -> bool {
         self.tok_type != other.tok_type
     }
 }
