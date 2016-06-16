@@ -14,10 +14,10 @@ impl Iterator for Lexer {
         let mut tok = self.match_token().unwrap();
 
         match tok.tok_type {
-            TokenType::EOF => return None,
+            TokenType::EOF => None,
             TokenType::WhiteSpace => {
                 tok = self.next().unwrap();
-                Some (tok)
+                Some(tok)
             },
             _ => Some(tok),
         }

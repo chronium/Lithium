@@ -14,21 +14,13 @@ impl Matcher for MatchWhitespace {
     fn try_match(&self, tok: &mut Tokenizer) -> Option<Token> {
         let mut found_ws = false;
 
-        while !tok.end() && (tok.peek().unwrap() == ' ' || tok.peek().unwrap() == '\r') {
+        while !tok.end() && " \n\r".contains(tok.peek().unwrap()) {
             found_ws = true;
-            if tok.peek().unwrap() == '\n' {
-                tok.line += 1;
-                tok.column = 0;
-            }
             tok.next();
         }
 
         if found_ws {
-            return Some(Token {
-                tok_type: TokenType::WhiteSpace,
-                line: tok.line,
-                col: tok.column,
-            });
+            return Some(Token { tok_type: TokenType::WhiteSpace });
         }
 
         None
@@ -49,11 +41,7 @@ impl Matcher for MatchNumber {
         }
 
         if !number.is_empty() {
-            return Some(Token {
-                tok_type: TokenType::IntLiteral(number.parse::<u64>().unwrap()),
-                line: tok.line,
-                col: tok.column,
-            });
+            return Some(Token { tok_type: TokenType::IntLiteral(number.parse::<u64>().unwrap()) });
         }
 
         None
@@ -82,13 +70,45 @@ impl Matcher for MatchSymbol {
 
             if dat.collect::<String>() == symbol {
                 tok.advance(symbol.len());
-                return Some(Token {
-                    tok_type: TokenType::Symbol(symbol),
-                    line: tok.line,
-                    col: tok.column,
-                });
+                return Some(Token { tok_type: TokenType::Symbol(symbol) });
             }
         }
+        None
+    }
+}
+
+#[allow(dead_code)]
+pub struct MatchIdentifier {
+
+}
+
+impl Matcher for MatchIdentifier {
+    fn try_match(&self, tok: &mut Tokenizer) -> Option<Token> {
+        let mut identifier = String::new();
+
+        let curr = tok.next().unwrap();
+        if curr == '_' || curr.is_alphabetic() {
+            identifier.push(curr);
+        } else {
+            return None;
+        }
+
+        loop {
+            if tok.end() {
+                break;
+            }
+            let current = tok.peek().unwrap();
+            if !current.is_whitespace() && (current == '_' || current.is_alphanumeric()) {
+                identifier.push(tok.next().unwrap());
+            } else {
+                break;
+            }
+        }
+
+        if !identifier.is_empty() {
+            return Some(Token { tok_type: TokenType::Identifier(identifier) });
+        }
+
         None
     }
 }

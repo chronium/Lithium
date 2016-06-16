@@ -2,6 +2,7 @@
 pub enum TokenType {
     IntLiteral(u64),
     Symbol(String),
+    Identifier(String),
     WhiteSpace,
     EOF,
 }
@@ -9,8 +10,6 @@ pub enum TokenType {
 #[derive(Debug)]
 pub struct Token {
     pub tok_type: TokenType,
-    pub line: u32,
-    pub col: u32,
 }
 
 impl PartialEq for Token {

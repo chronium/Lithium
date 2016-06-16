@@ -1,18 +1,14 @@
 use lexer::token::{Token, TokenType};
 use lexer::matcher::Matcher;
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 struct Snapshot {
     index: usize,
-    line: u32,
-    column: u32,
 }
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub struct Tokenizer {
     index: usize,
-    pub line: u32,
-    pub column: u32,
     items: Vec<char>,
     snapshots: Vec<Snapshot>,
 }
@@ -30,8 +26,6 @@ impl Tokenizer {
     pub fn new(items: &mut Iterator<Item = char>) -> Tokenizer {
         Tokenizer {
             index: 0,
-            line: 0,
-            column: 0,
             items: items.collect(),
             snapshots: Vec::new(),
         }
@@ -57,28 +51,20 @@ impl Tokenizer {
         }
         let val = Some(self.items[self.index].clone());
         self.index += 1;
-        self.column += 1;
         val
     }
 
     pub fn advance(&mut self, amm: usize) {
         self.index += amm;
-        self.column += amm as u32;
     }
 
     pub fn take_snapshot(&mut self) {
-        self.snapshots.push(Snapshot {
-            index: self.index,
-            line: self.line,
-            column: self.column,
-        });
+        self.snapshots.push(Snapshot { index: self.index });
     }
 
     pub fn rollback_snapshot(&mut self) {
         let snapshot = self.snapshots.pop().unwrap();
         self.index = snapshot.index;
-        self.line = snapshot.line;
-        self.column = snapshot.column;
     }
 
     pub fn commit_snapshot(&mut self) {
@@ -87,11 +73,7 @@ impl Tokenizer {
 
     pub fn try_match_token(&mut self, matcher: &Matcher) -> Option<Token> {
         if self.end() {
-            return Some(Token {
-                tok_type: TokenType::EOF,
-                line: self.line,
-                col: self.column,
-            });
+            return Some(Token { tok_type: TokenType::EOF });
         }
 
         self.take_snapshot();
